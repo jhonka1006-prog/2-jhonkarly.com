@@ -20,7 +20,7 @@ const initials = (name: string | null) =>
   name ? name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase() : "?";
 
 const MiCuenta = () => {
-  const { profile, role, signOut } = useAuth();
+    const { profile, user, role, signOut } = useAuth();
 
   const items = CONTENT[role] ?? [];
 
@@ -41,8 +41,8 @@ const MiCuenta = () => {
               <h1 className="font-display text-[clamp(2rem,5vw,4rem)] leading-[0.9] text-foreground">
                 {profile?.full_name ?? "Bienvenido"}
               </h1>
-              {profile?.email && (
-                <p className="font-body text-sm text-g300 mt-2">{profile.email}</p>
+              {user?.email && (
+                                            <p className="font-body text-sm text-g300 mt-2">{user.email}</p>
               )}
             </div>
           </div>
