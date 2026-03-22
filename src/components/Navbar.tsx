@@ -17,7 +17,7 @@ const Navbar = () => {
   const [open, setOpen] = useState(false);
 
   const accountLink = session
-    ? { to: role === "admin" ? "/mi-cuenta" : "/mi-cuenta", label: "Mi cuenta", exact: false }
+    ? { to: "/mi-cuenta", label: "Mi cuenta", exact: false }
     : { to: "/login", label: "Inicio de sesión", exact: false };
 
   const allLinks = [...PUBLIC_LINKS, accountLink];

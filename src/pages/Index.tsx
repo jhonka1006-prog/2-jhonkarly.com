@@ -36,7 +36,7 @@ const NAV_CARDS = [
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div id="main-content" className="min-h-screen bg-background">
 
       {/* ── HERO ── */}
       <section className="relative w-full h-screen min-h-[600px] flex items-end overflow-hidden">

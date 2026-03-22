@@ -13,7 +13,7 @@ const ProtectedRoute = ({ children, allowedRoles }: Props) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center" role="status" aria-live="polite">
         <span className="font-body text-[0.68rem] font-semibold tracking-[0.3em] uppercase text-g300 animate-pulse">
           Verificando acceso…
         </span>
