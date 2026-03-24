@@ -35,12 +35,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = async (userId: string) => {
-    const { data } = await supabase
-      .from("profiles")
-      .select("id, role, full_name")
-      .eq("id", userId)
-      .single();
-    setProfile(data ?? null);
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, role, full_name")
+        .eq("id", userId)
+        .single();
+      if (error) {
+        console.error("Error al cargar perfil:", error.message);
+        setProfile(null);
+        return;
+      }
+      setProfile(data ?? null);
+    } catch (err) {
+      console.error("Error inesperado al cargar perfil:", err);
+      setProfile(null);
+    }
   };
 
   useEffect(() => {
@@ -66,17 +76,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) return { error: error.message, role: null };
-    if (data.user) {
-      const { data: profileData } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", data.user.id)
-        .single();
-      return { error: null, role: (profileData?.role ?? "public") as UserRole };
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        // Distinguish between credential errors and network/server errors
+        const isCredentialError = error.message.includes("Invalid login credentials");
+        return {
+          error: isCredentialError
+            ? "Credenciales incorrectas. Inténtalo de nuevo."
+            : "Error de conexión. Verifica tu red e inténtalo de nuevo.",
+          role: null,
+        };
+      }
+      if (data.user) {
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", data.user.id)
+          .single();
+        return { error: null, role: (profileData?.role ?? "public") as UserRole };
+      }
+      return { error: null, role: "public" as UserRole };
+    } catch {
+      return { error: "Error de conexión. Verifica tu red e inténtalo de nuevo.", role: null };
     }
-    return { error: null, role: "public" as UserRole };
   };
 
   const signOut = async () => {

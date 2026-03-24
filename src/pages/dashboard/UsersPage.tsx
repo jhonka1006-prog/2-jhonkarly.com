@@ -15,6 +15,14 @@ interface Profile {
   created_at: string | null;
 }
 
+/* ── Confirm Dialog ── */
+interface ConfirmState {
+  open: boolean;
+  title: string;
+  description: string;
+  onConfirm: () => void;
+}
+
 const ROLES: UserRole[] = ["admin", "prensa", "premium", "public"];
 const PAGE_SIZE = 10;
 
@@ -56,6 +64,12 @@ const UsersPage = () => {
     role: "public" as UserRole,
   });
   const [createErrors, setCreateErrors] = useState<Record<string, string>>({});
+
+  /* ── Confirm dialog state ── */
+  const [confirm, setConfirm] = useState<ConfirmState>({ open: false, title: "", description: "", onConfirm: () => {} });
+  const closeConfirm = () => setConfirm((c) => ({ ...c, open: false }));
+  const askConfirm = (title: string, description: string, onConfirm: () => void) =>
+    setConfirm({ open: true, title, description, onConfirm });
 
   /* ── Fetch ── */
   const fetchUsers = async () => {
@@ -180,7 +194,7 @@ const UsersPage = () => {
     }
   };
 
-  const deleteUser = async (userId: string) => {
+  const doDeleteUser = async (userId: string) => {
     const { error } = await supabase.from("profiles").delete().eq("id", userId);
     if (error) {
       toast({ title: "Error al eliminar", description: error.message, variant: "destructive" });
@@ -190,6 +204,15 @@ const UsersPage = () => {
       setSelected((prev) => { const n = new Set(prev); n.delete(userId); return n; });
       fetchUsers();
     }
+  };
+
+  const deleteUser = (userId: string) => {
+    const user = users.find((u) => u.id === userId);
+    askConfirm(
+      "Eliminar usuario",
+      `¿Estás seguro de que deseas eliminar a ${user?.full_name ?? "este usuario"}? Esta acción no se puede deshacer.`,
+      () => doDeleteUser(userId),
+    );
   };
 
   const bulkUpdateRole = async (role: UserRole) => {
@@ -205,7 +228,7 @@ const UsersPage = () => {
     }
   };
 
-  const bulkDelete = async () => {
+  const doBulkDelete = async () => {
     const ids = Array.from(selected);
     const { error } = await supabase.from("profiles").delete().in("id", ids);
     if (error) {
@@ -215,6 +238,14 @@ const UsersPage = () => {
       setSelected(new Set());
       fetchUsers();
     }
+  };
+
+  const bulkDelete = () => {
+    askConfirm(
+      "Eliminar usuarios",
+      `¿Estás seguro de que deseas eliminar ${selected.size} usuario(s)? Esta acción no se puede deshacer.`,
+      doBulkDelete,
+    );
   };
 
   /* ── Input style helper ── */
@@ -569,6 +600,31 @@ const UsersPage = () => {
                 className="w-full py-3 font-body text-[0.68rem] font-semibold tracking-[0.2em] uppercase text-g700 hover:text-g300 transition-colors disabled:opacity-40"
               >
                 Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Confirm Dialog ── */}
+      {confirm.open && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center" onClick={closeConfirm}>
+          <div className="absolute inset-0 bg-black/60" />
+          <div className="relative w-full max-w-[400px] mx-4 bg-background border border-g700 p-8" onClick={(e) => e.stopPropagation()}>
+            <h3 className="font-display text-[1.6rem] leading-none text-foreground mb-3">{confirm.title}</h3>
+            <p className="font-body text-sm text-g300 mb-8">{confirm.description}</p>
+            <div className="flex gap-3">
+              <button
+                onClick={closeConfirm}
+                className="flex-1 py-3 font-body text-[0.68rem] font-semibold tracking-[0.2em] uppercase border border-g700 text-g300 hover:border-g300 hover:text-foreground transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => { confirm.onConfirm(); closeConfirm(); }}
+                className="flex-1 py-3 font-body text-[0.68rem] font-semibold tracking-[0.2em] uppercase bg-destructive text-destructive-foreground hover:opacity-80 transition-opacity"
+              >
+                Eliminar
               </button>
             </div>
           </div>

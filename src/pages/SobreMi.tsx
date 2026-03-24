@@ -2,7 +2,7 @@ import heroImage from "@/assets/sobre-mi-hero.jpg";
 
 const SobreMi = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div id="main-content" className="min-h-screen bg-background">
       {/* Hero Section */}
       <section className="relative w-full h-[70svh] min-h-[400px] flex items-end overflow-hidden">
         <div className="absolute inset-0">

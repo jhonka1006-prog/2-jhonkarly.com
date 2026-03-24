@@ -108,7 +108,7 @@ const MiCuenta = () => {
               <strong className="text-foreground font-semibold">premium</strong>.
             </p>
             <a
-              href="mailto:contac@jhonkarly.com"
+              href="mailto:contact@jhonkarly.com"
               className="inline-block px-8 py-3 bg-foreground text-background font-body font-semibold text-[0.72rem] tracking-[0.2em] uppercase transition-opacity duration-300 hover:opacity-80"
             >
               Solicitar acceso

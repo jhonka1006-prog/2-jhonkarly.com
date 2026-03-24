@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth, UserRole } from "@/context/AuthContext";
+import { supabase } from "@/lib/supabase";
 
 const schema = z.object({
   email: z.string().email("Correo electrónico inválido"),
@@ -28,6 +29,9 @@ const Login = () => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [resetMode, setResetMode] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
 
   const {
     register,
@@ -42,7 +46,7 @@ const Login = () => {
     const { error: authError, role: newRole } = await signIn(data.email, data.password);
 
     if (authError) {
-      setError("Credenciales incorrectas. Inténtalo de nuevo.");
+      setError(authError);
       setLoading(false);
       return;
     }
@@ -90,9 +94,13 @@ const Login = () => {
               <label htmlFor="password" className="font-body text-[0.65rem] font-semibold tracking-[0.28em] uppercase text-g300">
                 Contraseña
               </label>
-              <a href="#" className="font-body text-[0.7rem] text-g300 hover:text-foreground transition-colors duration-300">
+              <button
+                type="button"
+                onClick={() => { setResetMode(true); setError(null); setResetSent(false); }}
+                className="font-body text-[0.7rem] text-g300 hover:text-foreground transition-colors duration-300"
+              >
                 ¿Olvidaste tu contraseña?
-              </a>
+              </button>
             </div>
             <input
               id="password"
@@ -130,7 +138,7 @@ const Login = () => {
 
         <p className="font-body text-[0.78rem] text-g300 text-center">
           ¿No tienes cuenta?{" "}
-          <a href="mailto:contac@jhonkarly.com" className="text-foreground hover:text-g300 transition-colors duration-300">
+          <a href="mailto:contact@jhonkarly.com" className="text-foreground hover:text-g300 transition-colors duration-300">
             Solicitar acceso
           </a>
         </p>
@@ -142,6 +150,85 @@ const Login = () => {
         </div>
 
       </div>
+
+      {/* ── Password Reset Modal ── */}
+      {resetMode && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={() => !resetLoading && setResetMode(false)}>
+          <div className="absolute inset-0 bg-black/60" />
+          <div className="relative w-full max-w-[420px] mx-4 bg-background border border-g700 p-8" onClick={(e) => e.stopPropagation()}>
+            <span className="font-body text-[0.58rem] font-semibold tracking-[0.38em] uppercase text-g700 block mb-2">
+              Recuperar acceso
+            </span>
+            <h2 className="font-display text-[2rem] leading-none text-foreground mb-6">
+              Restablecer contraseña
+            </h2>
+
+            {resetSent ? (
+              <div>
+                <p className="font-body text-sm text-g300 leading-[1.85] mb-6">
+                  Si existe una cuenta con ese correo, recibirás un enlace para restablecer tu contraseña. Revisa tu bandeja de entrada y spam.
+                </p>
+                <button
+                  onClick={() => { setResetMode(false); setResetSent(false); }}
+                  className="w-full py-3 bg-foreground text-background font-body font-semibold text-[0.72rem] tracking-[0.2em] uppercase transition-opacity hover:opacity-80"
+                >
+                  Volver al inicio de sesión
+                </button>
+              </div>
+            ) : (
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  const email = (e.currentTarget.elements.namedItem("reset-email") as HTMLInputElement).value;
+                  if (!email) { setError("Ingresa tu correo electrónico."); return; }
+                  setResetLoading(true);
+                  setError(null);
+                  const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+                    redirectTo: `${window.location.origin}/login`,
+                  });
+                  setResetLoading(false);
+                  if (resetError) {
+                    setError("Error al enviar el enlace. Inténtalo de nuevo.");
+                  } else {
+                    setResetSent(true);
+                  }
+                }}
+              >
+                <p className="font-body text-sm text-g300 leading-[1.85] mb-6">
+                  Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.
+                </p>
+                <input
+                  name="reset-email"
+                  type="email"
+                  placeholder="tucorreo@ejemplo.com"
+                  className="login-input w-full mb-4"
+                  disabled={resetLoading}
+                />
+                {error && (
+                  <p className="font-body text-[0.78rem] text-destructive mb-4">{error}</p>
+                )}
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => { setResetMode(false); setError(null); }}
+                    disabled={resetLoading}
+                    className="flex-1 py-3 font-body text-[0.68rem] font-semibold tracking-[0.2em] uppercase border border-g700 text-g300 hover:border-g300 hover:text-foreground transition-colors disabled:opacity-40"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={resetLoading}
+                    className="flex-1 py-3 bg-foreground text-background font-body font-semibold text-[0.72rem] tracking-[0.2em] uppercase transition-opacity hover:opacity-80 disabled:opacity-40"
+                  >
+                    {resetLoading ? "Enviando…" : "Enviar enlace"}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

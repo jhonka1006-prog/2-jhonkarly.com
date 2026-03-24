@@ -1,29 +1,40 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 
 import { AuthProvider } from "@/context/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import PageTransition from "@/components/PageTransition";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
-import Index from "@/pages/Index";
-import SobreMi from "@/pages/SobreMi";
-import Tienda from "@/pages/Tienda";
-import Prensa from "@/pages/Prensa";
-import Trayectoria from "@/pages/Trayectoria";
-import Login from "@/pages/Login";
-import Dashboard from "@/pages/Dashboard";
-import AccesoDenegado from "@/pages/AccesoDenegado";
-import NotFound from "@/pages/NotFound";
-import MiCuenta from "@/pages/MiCuenta";
-import OverviewPage from "@/pages/dashboard/OverviewPage";
-import UsersPage from "@/pages/dashboard/UsersPage";
+/* ── Lazy-loaded pages (code splitting) ── */
+const Index = lazy(() => import("@/pages/Index"));
+const SobreMi = lazy(() => import("@/pages/SobreMi"));
+const Tienda = lazy(() => import("@/pages/Tienda"));
+const Prensa = lazy(() => import("@/pages/Prensa"));
+const Trayectoria = lazy(() => import("@/pages/Trayectoria"));
+const Login = lazy(() => import("@/pages/Login"));
+const Dashboard = lazy(() => import("@/pages/Dashboard"));
+const AccesoDenegado = lazy(() => import("@/pages/AccesoDenegado"));
+const NotFound = lazy(() => import("@/pages/NotFound"));
+const MiCuenta = lazy(() => import("@/pages/MiCuenta"));
+const OverviewPage = lazy(() => import("@/pages/dashboard/OverviewPage"));
+const UsersPage = lazy(() => import("@/pages/dashboard/UsersPage"));
 
 const queryClient = new QueryClient();
+
+/* ── Loading fallback for Suspense ── */
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center bg-background">
+    <span className="font-body text-sm text-g300 tracking-widest uppercase animate-pulse">
+      Cargando…
+    </span>
+  </div>
+);
 
 /* ── App shell: hides global Navbar/Footer inside dashboard ── */
 const AppShell = () => {
@@ -34,6 +45,7 @@ const AppShell = () => {
     <>
       {!isDash && <Navbar />}
 
+      <Suspense fallback={<PageLoader />}>
       <PageTransition>
         <Routes>
           {/* ── Rutas públicas ── */}
@@ -86,6 +98,7 @@ const AppShell = () => {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </PageTransition>
+      </Suspense>
 
       {!isDash && <Footer />}
     </>
@@ -96,10 +109,11 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
-      <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <AppShell />
+          <ErrorBoundary>
+            <AppShell />
+          </ErrorBoundary>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

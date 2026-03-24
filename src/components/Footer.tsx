@@ -30,8 +30,8 @@ const Footer = () => {
           <span className="footer-col__title">Contacto</span>
           <ul className="footer-nav-list">
             <li>
-              <a href="mailto:contac@jhonkarly.com" aria-label="Enviar correo a contac@jhonkarly.com">
-                contac@jhonkarly.com
+              <a href="mailto:contact@jhonkarly.com" aria-label="Enviar correo a contact@jhonkarly.com">
+                contact@jhonkarly.com
               </a>
             </li>
           </ul>
