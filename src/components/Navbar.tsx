@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/hooks/use-auth";
 import "../index.css";
 
 const PUBLIC_LINKS = [
@@ -13,7 +13,7 @@ const PUBLIC_LINKS = [
 
 const Navbar = () => {
   const location  = useLocation();
-  const { session, role } = useAuth();
+  const { session } = useAuth();
   const [open, setOpen] = useState(false);
 
   const accountLink = session

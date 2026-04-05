@@ -3,7 +3,8 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useAuth, UserRole } from "@/context/AuthContext";
+import { useAuth } from "@/hooks/use-auth";
+import { UserRole } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
 
 const schema = z.object({

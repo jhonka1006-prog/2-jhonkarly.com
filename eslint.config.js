@@ -20,7 +20,22 @@ export default tseslint.config(
     rules: {
       ...reactHooks.configs.recommended.rules,
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
+      "@typescript-eslint/no-unused-vars": ["warn", { varsIgnorePattern: "^_", argsIgnorePattern: "^_" }],
+    },
+  },
+  // Auto-generated shadcn/ui components — suppress fast-refresh warnings
+  {
+    files: ["src/components/ui/**/*.{ts,tsx}", "src/hooks/use-toast.ts"],
+    rules: {
+      "react-refresh/only-export-components": "off",
       "@typescript-eslint/no-unused-vars": "off",
+    },
+  },
+  // AuthContext exports context + provider together — accepted pattern
+  {
+    files: ["src/context/AuthContext.tsx"],
+    rules: {
+      "react-refresh/only-export-components": "off",
     },
   },
 );

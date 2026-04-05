@@ -1,6 +1,5 @@
 import {
   createContext,
-  useContext,
   useEffect,
   useState,
   ReactNode,
@@ -26,7 +25,7 @@ interface AuthContextValue {
   signOut: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextValue | null>(null);
+export const AuthContext = createContext<AuthContextValue | null>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
@@ -115,8 +114,3 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export const useAuth = () => {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth debe usarse dentro de <AuthProvider>");
-  return ctx;
-};

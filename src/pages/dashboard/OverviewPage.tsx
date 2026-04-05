@@ -51,12 +51,22 @@ const TICK = {
 };
 
 /* ── Custom tooltip ── */
-const ChartTooltip = ({ active, payload, label }: any) => {
+interface TooltipEntry {
+  name: string;
+  value: number | string;
+  color: string;
+}
+interface ChartTooltipProps {
+  active?: boolean;
+  payload?: TooltipEntry[];
+  label?: string;
+}
+const ChartTooltip = ({ active, payload, label }: ChartTooltipProps) => {
   if (!active || !payload?.length) return null;
   return (
     <div className="bg-g900 border border-g700 px-3 py-2">
       <p className="font-body text-[0.6rem] tracking-[0.28em] uppercase text-g700 mb-1">{label}</p>
-      {payload.map((p: any) => (
+      {payload.map((p) => (
         <p key={p.name} className="font-body text-[0.78rem] font-semibold" style={{ color: p.color }}>
           {p.name}: {p.value}
         </p>

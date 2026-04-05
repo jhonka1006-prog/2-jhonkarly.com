@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import { useAuth, UserRole } from "@/context/AuthContext";
+import { useAuth } from "@/hooks/use-auth";
+import { UserRole } from "@/context/AuthContext";
 
 const CONTENT: Record<UserRole, { label: string; desc: string; to: string; tag: string }[]> = {
   admin: [

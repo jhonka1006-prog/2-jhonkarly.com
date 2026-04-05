@@ -98,7 +98,7 @@ const Footer = () => {
 
       <div className="site-footer__bottom">
         <p className="footer-copy">
-          &copy; <time dateTime="2025">2025</time> &nbsp;·&nbsp; <strong>Jhonkarly Alvarez Pantoja</strong> &nbsp;·&nbsp; Todos los derechos reservados.
+          &copy; <time dateTime="2026">2026</time> &nbsp;·&nbsp; <strong>Jhonkarly Alvarez Pantoja</strong> &nbsp;·&nbsp; Todos los derechos reservados.
         </p>
         <nav className="footer-legal" aria-label="Legal">
           <Link to="/privacidad">Privacidad</Link>
