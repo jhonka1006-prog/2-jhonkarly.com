@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
 import { UserRole } from "@/context/AuthContext";
@@ -50,6 +50,25 @@ const Login = () => {
   const [resetSent, setResetSent] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
 
+  // ── Resultado de los enlaces de correo (verificación / recuperación) ──
+  // El hash se captura en el primer render: el SDK lo limpia al procesarlo.
+  const verificado = new URLSearchParams(location.search).has("verificado");
+  const [hashError] = useState<string | null>(() =>
+    new URLSearchParams(window.location.hash.slice(1)).get("error_description")
+  );
+  const [recoveryMode, setRecoveryMode] = useState(() =>
+    window.location.hash.includes("type=recovery")
+  );
+  const [recoveryDone, setRecoveryDone] = useState(false);
+  const [recoveryLoading, setRecoveryLoading] = useState(false);
+
+  useEffect(() => {
+    const { data } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY") setRecoveryMode(true);
+    });
+    return () => data.subscription.unsubscribe();
+  }, []);
+
   const {
     register,
     handleSubmit,
@@ -85,7 +104,10 @@ const Login = () => {
     const { error: signUpError } = await supabase.auth.signUp({
       email: data.email,
       password: data.password,
-      options: { data: { full_name: data.full_name } },
+      options: {
+        data: { full_name: data.full_name },
+        emailRedirectTo: `${window.location.origin}/login?verificado=1`,
+      },
     });
     setLoading(false);
     if (signUpError) {
@@ -113,6 +135,118 @@ const Login = () => {
           </h1>
         </div>
 
+        {/* Resultado del enlace del correo de verificación */}
+        {verificado && !hashError && !recoveryMode && (
+          <div className="border border-g700 bg-g900 border-l-2 border-l-foreground p-6 mb-8">
+            <p className="font-body text-[0.82rem] text-g300 leading-[1.75]">
+              <strong className="text-foreground">✓ Correo confirmado.</strong>{" "}
+              Tu cuenta ya está activa.
+              {session
+                ? " Además tienes la sesión iniciada: puedes ir a la tienda o a tu cuenta."
+                : " Inicia sesión para continuar."}
+            </p>
+          </div>
+        )}
+        {hashError && !recoveryMode && (
+          <div className="border border-destructive/30 bg-destructive/10 p-6 mb-8">
+            <p className="font-body text-[0.82rem] text-g300 leading-[1.75]">
+              <strong className="text-foreground">El enlace del correo no funcionó</strong>{" "}
+              (probablemente expiró o ya se había usado). Si era para confirmar tu
+              cuenta, regístrate de nuevo con el mismo correo; si era para cambiar la
+              contraseña, pide otro enlace con "¿Olvidaste tu contraseña?".
+            </p>
+          </div>
+        )}
+
+        {/* ── Recuperación de contraseña: definir la nueva ── */}
+        {recoveryMode ? (
+          <div className="border border-g700 bg-g900 p-8">
+            {recoveryDone ? (
+              <>
+                <h2 className="font-display text-[1.8rem] leading-none text-foreground mb-4">
+                  Contraseña actualizada
+                </h2>
+                <p className="font-body font-light text-[0.88rem] text-g300 leading-[1.85] mb-6">
+                  Ya puedes usar tu nueva contraseña. Tu sesión quedó iniciada.
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  {(role === "master" || role === "admin") && (
+                    <Link
+                      to="/dashboard"
+                      className="px-6 py-3 bg-foreground text-background font-body font-semibold text-[0.68rem] tracking-[0.2em] uppercase transition-opacity hover:opacity-80"
+                    >
+                      Ir al panel
+                    </Link>
+                  )}
+                  <Link
+                    to="/mi-cuenta"
+                    className="px-6 py-3 border border-g700 text-g300 font-body font-semibold text-[0.68rem] tracking-[0.2em] uppercase hover:text-foreground hover:border-g300 transition-colors"
+                  >
+                    Mi cuenta
+                  </Link>
+                </div>
+              </>
+            ) : (
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  const form = e.currentTarget;
+                  const pw = (form.elements.namedItem("new-password") as HTMLInputElement).value;
+                  const pw2 = (form.elements.namedItem("new-password-2") as HTMLInputElement).value;
+                  if (pw.length < 6) { setError("La contraseña debe tener al menos 6 caracteres."); return; }
+                  if (pw !== pw2) { setError("Las contraseñas no coinciden."); return; }
+                  setRecoveryLoading(true);
+                  setError(null);
+                  const { error: updError } = await supabase.auth.updateUser({ password: pw });
+                  setRecoveryLoading(false);
+                  if (updError) {
+                    setError("No se pudo actualizar la contraseña. El enlace pudo haber expirado: pide uno nuevo.");
+                  } else {
+                    setRecoveryDone(true);
+                  }
+                }}
+              >
+                <h2 className="font-display text-[1.8rem] leading-none text-foreground mb-4">
+                  Nueva contraseña
+                </h2>
+                <p className="font-body font-light text-[0.88rem] text-g300 leading-[1.85] mb-6">
+                  Escribe la contraseña que usarás de ahora en adelante.
+                </p>
+                <div className="flex flex-col gap-4 mb-6">
+                  <input
+                    name="new-password"
+                    type="password"
+                    autoComplete="new-password"
+                    placeholder="Nueva contraseña"
+                    className="login-input"
+                    disabled={recoveryLoading}
+                  />
+                  <input
+                    name="new-password-2"
+                    type="password"
+                    autoComplete="new-password"
+                    placeholder="Repite la contraseña"
+                    className="login-input"
+                    disabled={recoveryLoading}
+                  />
+                </div>
+                {error && (
+                  <p className="font-body text-[0.78rem] text-destructive border border-destructive/30 bg-destructive/10 px-4 py-3 mb-4">
+                    {error}
+                  </p>
+                )}
+                <button
+                  type="submit"
+                  disabled={recoveryLoading}
+                  className="w-full py-3 bg-foreground text-background font-body font-semibold text-[0.72rem] tracking-[0.2em] uppercase transition-opacity hover:opacity-80 disabled:opacity-50"
+                >
+                  {recoveryLoading ? "Guardando…" : "Guardar contraseña"}
+                </button>
+              </form>
+            )}
+          </div>
+        ) : (
+        <>
         {/* Sesión ya activa (p. ej. modo vista previa): atajos directos */}
         {session && (
           <div className="border border-g700 bg-g900 p-6 mb-8">
@@ -288,6 +422,8 @@ const Login = () => {
               </a>
             </p>
           </>
+        )}
+        </>
         )}
 
         <div className="mt-10 text-center">

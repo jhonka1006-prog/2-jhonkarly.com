@@ -17,11 +17,15 @@ vi.mock("react-router-dom", async (importOriginal) => {
   };
 });
 
-/* ── Mock supabase (para el reset de contraseña) ───────────────────────── */
+/* ── Mock supabase (reset de contraseña y enlaces de correo) ───────────── */
 vi.mock("@/lib/supabase", () => ({
   supabase: {
     auth: {
       resetPasswordForEmail: vi.fn().mockResolvedValue({ error: null }),
+      updateUser: vi.fn().mockResolvedValue({ error: null }),
+      onAuthStateChange: vi.fn().mockReturnValue({
+        data: { subscription: { unsubscribe: vi.fn() } },
+      }),
     },
   },
   supabaseReady: true,
