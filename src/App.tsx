@@ -1,6 +1,5 @@
 import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 
@@ -8,6 +7,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import PageTransition from "@/components/PageTransition";
+import ScrollToTop from "@/components/ScrollToTop";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
@@ -22,10 +22,30 @@ const Dashboard = lazy(() => import("@/pages/Dashboard"));
 const AccesoDenegado = lazy(() => import("@/pages/AccesoDenegado"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 const MiCuenta = lazy(() => import("@/pages/MiCuenta"));
+const Privacidad = lazy(() => import("@/pages/Privacidad"));
+const Terminos = lazy(() => import("@/pages/Terminos"));
 const OverviewPage = lazy(() => import("@/pages/dashboard/OverviewPage"));
 const UsersPage = lazy(() => import("@/pages/dashboard/UsersPage"));
+const PrensaAdminPage = lazy(() => import("@/pages/dashboard/PrensaAdminPage"));
+const TiendaAdminPage = lazy(() => import("@/pages/dashboard/TiendaAdminPage"));
+const PedidosAdminPage = lazy(() => import("@/pages/dashboard/PedidosAdminPage"));
+const CompetenciasAdminPage = lazy(() => import("@/pages/dashboard/CompetenciasAdminPage"));
+const TrayectoriaAdminPage = lazy(() => import("@/pages/dashboard/TrayectoriaAdminPage"));
+const SponsorsAdminPage = lazy(() => import("@/pages/dashboard/SponsorsAdminPage"));
+const PrensaKit = lazy(() => import("@/pages/PrensaKit"));
+const FacturacionAdminPage = lazy(() => import("@/pages/dashboard/FacturacionAdminPage"));
 
-const queryClient = new QueryClient();
+/* staleTime evita repetir la misma consulta al re-montar componentes o volver
+   a la pestaña; los datos del sitio cambian poco y se refrescan al invalidar. */
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60_000,
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 /* ── Loading fallback for Suspense ── */
 const PageLoader = () => (
@@ -43,6 +63,7 @@ const AppShell = () => {
 
   return (
     <>
+      <ScrollToTop />
       {!isDash && <Navbar />}
 
       <Suspense fallback={<PageLoader />}>
@@ -56,29 +77,53 @@ const AppShell = () => {
           <Route path="/trayectoria"     element={<Trayectoria />} />
           <Route path="/login"           element={<Login />} />
           <Route path="/acceso-denegado" element={<AccesoDenegado />} />
+          <Route path="/privacidad"      element={<Privacidad />} />
+          <Route path="/terminos"        element={<Terminos />} />
           <Route path="/mi-cuenta"       element={<ProtectedRoute><MiCuenta /></ProtectedRoute>} />
 
           {/* ── Dashboard (layout con sidebar + rutas anidadas) ── */}
           <Route
             path="/dashboard"
             element={
-              <ProtectedRoute allowedRoles={["admin"]}>
+              <ProtectedRoute allowedRoles={["admin", "master"]}>
                 <Dashboard />
               </ProtectedRoute>
             }
           >
             <Route index         element={<OverviewPage />} />
-            <Route path="usuarios" element={<UsersPage />} />
+            {/* Gestión de usuarios: solo la cuenta maestra */}
+            <Route
+              path="usuarios"
+              element={
+                <ProtectedRoute allowedRoles={["master"]}>
+                  <UsersPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="mi-cuenta" element={<MiCuenta />} />
+            <Route path="prensa"   element={<PrensaAdminPage />} />
+            <Route path="tienda"   element={<TiendaAdminPage />} />
+            <Route path="pedidos"  element={<PedidosAdminPage />} />
+            <Route path="competencias" element={<CompetenciasAdminPage />} />
+            <Route path="trayectoria" element={<TrayectoriaAdminPage />} />
+            <Route path="sponsors" element={<SponsorsAdminPage />} />
+            {/* Datos fiscales: solo la cuenta maestra */}
+            <Route
+              path="facturacion"
+              element={
+                <ProtectedRoute allowedRoles={["master"]}>
+                  <FacturacionAdminPage />
+                </ProtectedRoute>
+              }
+            />
           </Route>
 
           {/* ── Rutas privadas — Prensa ── */}
           <Route
             path="/prensa/kit"
             element={
-              <ProtectedRoute allowedRoles={["admin", "prensa"]}>
-                <div className="min-h-screen pt-[68px] flex items-center justify-center text-g300 font-body tracking-widest text-sm uppercase">
-                  Kit de prensa — en construcción
-                </div>
+              <ProtectedRoute allowedRoles={["master", "admin", "prensa"]}>
+                <PrensaKit />
               </ProtectedRoute>
             }
           />
@@ -87,7 +132,7 @@ const AppShell = () => {
           <Route
             path="/exclusivo"
             element={
-              <ProtectedRoute allowedRoles={["admin", "premium"]}>
+              <ProtectedRoute allowedRoles={["master", "admin", "premium"]}>
                 <div className="min-h-screen pt-[68px] flex items-center justify-center text-g300 font-body tracking-widest text-sm uppercase">
                   Contenido exclusivo — en construcción
                 </div>
@@ -107,16 +152,14 @@ const AppShell = () => {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <BrowserRouter>
-        <AuthProvider>
-          <ErrorBoundary>
-            <AppShell />
-          </ErrorBoundary>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
+    <Toaster />
+    <BrowserRouter>
+      <AuthProvider>
+        <ErrorBoundary>
+          <AppShell />
+        </ErrorBoundary>
+      </AuthProvider>
+    </BrowserRouter>
   </QueryClientProvider>
 );
 

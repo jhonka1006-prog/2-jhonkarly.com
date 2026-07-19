@@ -15,7 +15,7 @@ describe("Footer", () => {
   it("renderiza el nombre del atleta", () => {
     render(<Footer />);
     // El footer tiene el nombre en el link de marca y en el copyright — usamos getAllBy
-    const matches = screen.getAllByText(/jhonkarly alvarez/i);
+    const matches = screen.getAllByText(/jhonkarly [áa]lvarez/i);
     expect(matches.length).toBeGreaterThanOrEqual(1);
   });
 

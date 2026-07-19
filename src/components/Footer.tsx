@@ -5,12 +5,13 @@ const Footer = () => {
     <footer className="site-footer" role="contentinfo">
       <div className="site-footer__grid">
         <div className="footer-brand">
-          <Link to="/" className="footer-brand__name" aria-label="Jhonkarly ALVAREZ — Inicio">
+          <Link to="/" className="footer-brand__name" aria-label="Jhonkarly Alvarez — Inicio">
             JHONKARLY ALVAREZ
           </Link>
           <p className="footer-brand__desc">
-            Atleta paralímpico colombiano. Nadador de alta competencia.
-            En dos años, medallista paralímpico en Los Ángeles 2028.
+            Atleta paralímpico colombiano. Nadador de alta competencia
+            con una meta clara: el podio de los Juegos Paralímpicos
+            de Los Ángeles 2028.
           </p>
         </div>
 

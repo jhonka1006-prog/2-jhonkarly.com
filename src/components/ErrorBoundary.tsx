@@ -29,7 +29,7 @@ class ErrorBoundary extends Component<Props, State> {
       return (
         <div className="min-h-screen bg-background flex items-center justify-center px-[var(--px)]">
           <div className="max-w-[480px] text-center">
-            <span className="font-body text-[0.65rem] font-semibold tracking-[0.38em] uppercase text-g700 block mb-4">
+            <span className="font-body text-[0.65rem] font-semibold tracking-[0.38em] uppercase text-g500 block mb-4">
               Error inesperado
             </span>
             <h1 className="font-display text-[clamp(3rem,8vw,6rem)] leading-[0.9] text-foreground mb-6">

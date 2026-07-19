@@ -1,19 +1,18 @@
 import { Link } from "react-router-dom";
-import heroImage from "@/assets/hero-inicio.jpg";
+import { FOTOS_INICIO } from "@/lib/imagenes";
+import { usePageMeta } from "@/lib/seo";
+import SponsorsMarquee from "@/components/SponsorsMarquee";
+import Reveal from "@/components/Reveal";
+
+/* FOTO DE INICIO: pega tu foto en src/assets/inicio/
+   (si hay varias se usa la primera por orden de nombre). */
+const heroImage = FOTOS_INICIO[0];
 
 const STATS = [
-  { num: "10 KM",   lbl: "Diarios de nado" },
+  { num: "15 KM",   lbl: "Diarios de nado" },
   { num: "7 días",  lbl: "Sin tregua" },
   { num: "LA 2028", lbl: "Juegos Paralímpicos" },
   { num: "3×/sem",  lbl: "Fuerza y resistencia" },
-];
-
-const FACTS = [
-  { key: "Deporte",       val: "Natación Adaptada" },
-  { key: "Categoría",     val: "Paralímpico" },
-  { key: "País",          val: "Colombia" },
-  { key: "Objetivo",      val: "Los Ángeles 2028" },
-  { key: "Entrenamiento", val: "10 km / día" },
 ];
 
 const NAV_CARDS = [
@@ -32,21 +31,44 @@ const NAV_CARDS = [
     desc: "Resultados, récords y la línea de tiempo de una carrera excepcional.",
     to: "/trayectoria", cta: "Ver trayectoria",
   },
+  {
+    num: "04", title: "Tienda",
+    desc: "Merchandising oficial. Cada compra apoya el camino a Los Ángeles 2028.",
+    to: "/tienda", cta: "Ver tienda",
+  },
 ];
 
 const Index = () => {
+  usePageMeta({
+    titulo: "Jhonkarly Alvarez — Nadador Paralímpico Colombiano | LA 2028",
+    descripcion:
+      "Sitio oficial de Jhonkarly Alvarez Pantoja, nadador paralímpico colombiano. Trayectoria, prensa, resultados y rumbo a Los Ángeles 2028.",
+    ruta: "/",
+  });
+
   return (
     <div id="main-content" className="min-h-screen bg-background">
 
       {/* ── HERO ── */}
       <section className="relative w-full h-screen min-h-[600px] flex items-end overflow-hidden">
         <div className="absolute inset-0">
-          <img
-            src={heroImage}
-            alt="Jhonkarly ALVAREZ, atleta paralímpico colombiano"
-            className="w-full h-full object-cover"
-            loading="eager"
-          />
+          {heroImage ? (
+            <img
+              src={heroImage}
+              alt="Jhonkarly Alvarez, atleta paralímpico colombiano"
+              className="w-full h-full object-cover"
+              loading="eager"
+              decoding="async"
+              /* fetchpriority en minúsculas: React 18 aún no conoce la forma camelCase */
+              {...({ fetchpriority: "high" } as Record<string, string>)}
+            />
+          ) : (
+            <div className="w-full h-full bg-g900 flex items-center justify-center">
+              <span className="font-body text-[0.62rem] font-semibold tracking-[0.35em] uppercase text-g500 text-center px-6">
+                Pega tu foto en src/assets/inicio/
+              </span>
+            </div>
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/55 to-transparent" />
         </div>
 
@@ -109,106 +131,41 @@ const Index = () => {
         </div>
       </section>
 
-      {/* ── BIO ── */}
-      <section className="border-t border-border py-[var(--section-py)] px-[var(--px)]">
-        <div className="max-w-[var(--container-max)] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-[clamp(48px,8vw,120px)] items-start">
-
-          {/* Left */}
-          <article>
-            <span className="font-body text-[0.68rem] font-semibold tracking-[0.38em] uppercase text-g300 block mb-6">
-              Quién es
-            </span>
-            <h2 className="font-display text-[clamp(2.8rem,6vw,6rem)] leading-[0.9] mb-10 text-foreground">
-              La voluntad<br />
-              <span className="text-g300">es de acero</span>
-            </h2>
-
-            <p className="font-body font-light text-[clamp(0.88rem,1.1vw,0.98rem)] leading-[1.85] text-g300 mb-5 max-w-[480px]">
-              Para la mayoría de los atletas, el deporte es pasión.
-              Para <strong className="font-semibold text-foreground">Jhonkarly ALVAREZ Pantoja</strong>, la natación es una tortura necesaria.
-              No nada porque ame el agua — los primeros 50 metros bajo el frío son una incomodidad
-              insoportable que preferiría cambiar mil veces por la calma de su casa.
-            </p>
-            <p className="font-body font-light text-[clamp(0.88rem,1.1vw,0.98rem)] leading-[1.85] text-g300 mb-5 max-w-[480px]">
-              Pero es precisamente en ese rechazo donde reside su verdadera fuerza:{" "}
-              <strong className="font-semibold text-foreground">
-                hace lo que odia como si lo amara, solo para demostrarse a sí mismo de qué está hecho.
-              </strong>
-            </p>
-            <p className="font-body font-light text-[clamp(0.88rem,1.1vw,0.98rem)] leading-[1.85] text-g300 mb-8 max-w-[480px]">
-              Su disciplina no se mide en medallas, sino en los kilómetros recorridos fuera del agua,
-              caminando hacia el entrenamiento con la prótesis al hombro, sobre un muñón lleno de llagas
-              vivas.
-            </p>
-            <Link
-              to="/sobre-mi"
-              className="font-body text-[0.7rem] font-semibold tracking-[0.22em] uppercase text-foreground relative inline-block after:absolute after:bottom-[-4px] after:left-0 after:h-px after:w-full after:bg-foreground"
-            >
-              Leer historia completa
-            </Link>
-          </article>
-
-          {/* Right */}
-          <div className="pt-4">
-            <div className="border-l-2 border-g700 p-7 bg-g900 mb-10">
-              <blockquote className="font-body font-light italic text-[clamp(1rem,1.6vw,1.2rem)] leading-[1.7] text-g100">
-                "La paz real no se encuentra en el descanso, sino en ese segundo exacto
-                al salir de la piscina después del entrenamiento más duro de tu vida.
-                Ahí la tortura se transforma en victoria."
-              </blockquote>
-              <cite className="block not-italic text-[0.68rem] font-semibold tracking-[0.25em] uppercase text-g300 mt-5">
-                — Jhonkarly ALVAREZ Pantoja
-              </cite>
-            </div>
-
-            <dl className="flex flex-col">
-              {FACTS.map((f) => (
-                <div key={f.key} className="flex justify-between items-center py-4 border-b border-g800 gap-6">
-                  <dt className="font-body text-[0.7rem] font-semibold tracking-[0.2em] uppercase text-g300 shrink-0">
-                    {f.key}
-                  </dt>
-                  <dd className="font-display text-[1.1rem] tracking-[0.06em] text-foreground text-right">
-                    {f.val}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          </div>
-        </div>
-      </section>
+      {/* ── PATROCINADORES ── */}
+      <SponsorsMarquee />
 
       {/* ── PULL QUOTE ── */}
-      <section className="bg-g900 border-t border-b border-g700 py-[clamp(72px,12vw,140px)] px-[var(--px)] text-center">
-        <div className="max-w-[1000px] mx-auto">
+      <section id="frase" className="bg-g900 border-t border-b border-g700 py-[clamp(72px,12vw,140px)] px-[var(--px)] text-center">
+        <Reveal className="max-w-[1000px] mx-auto">
           <p className="font-display text-[clamp(2.2rem,5.5vw,5.5rem)] leading-[1.05] text-foreground tracking-[0.01em]">
             No se puede<br />
             <span className="text-g300">vencer a quien</span><br />
             no sabe rendirse.
           </p>
           <span className="block text-[0.68rem] font-semibold tracking-[0.3em] uppercase text-g300 mt-10">
-            Su visión para Los Ángeles 2028
+            Rumbo a Los Ángeles 2028
           </span>
-        </div>
+        </Reveal>
       </section>
 
       {/* ── NAV CARDS ── */}
-      <section className="py-[var(--section-py)] px-[var(--px)]">
+      <section id="explorar" className="py-[var(--section-py)] px-[var(--px)]">
         <div className="max-w-[var(--container-max)] mx-auto">
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-12 pb-6 border-b border-g700">
+          <Reveal className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-12 pb-6 border-b border-g700">
             <h2 className="font-display text-[clamp(2.5rem,5vw,4.5rem)] leading-[0.9] text-foreground">
               Explorar
             </h2>
             <p className="font-body font-light text-[0.88rem] text-g300 max-w-[340px]">
               Conoce la historia completa, la cobertura mediática y el récord deportivo.
             </p>
-          </div>
+          </Reveal>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border-l border-g700">
+          <Reveal delay={120} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-0 border-l border-t border-g700">
             {NAV_CARDS.map((card) => (
               <Link
                 key={card.num}
                 to={card.to}
-                className="group block border-r border-g700 p-8 transition-colors duration-300 hover:bg-g900"
+                className="group block border-r border-b border-g700 p-8 transition-colors duration-300 hover:bg-g900"
               >
                 <span className="font-display text-[clamp(3rem,6vw,5rem)] text-g700 leading-none block mb-6 transition-colors duration-300 group-hover:text-g300">
                   {card.num}
@@ -224,8 +181,34 @@ const Index = () => {
                 </span>
               </Link>
             ))}
-          </div>
+          </Reveal>
         </div>
+      </section>
+
+      {/* ── MI LIBRO — teaser ── */}
+      <section id="libro" className="bg-foreground py-[clamp(56px,9vw,110px)] px-[var(--px)]" aria-label="Mi libro">
+        <Reveal className="max-w-[var(--container-max)] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-10">
+          <div>
+            <span className="font-body text-[0.68rem] font-semibold tracking-[0.38em] uppercase text-background/50 block mb-5">
+              Próximamente — Mi libro
+            </span>
+            <p className="font-display text-[clamp(2rem,5vw,4.5rem)] leading-[0.95] text-background">
+              Voluntad<br />
+              <span className="text-background/50">de acero</span>
+            </p>
+            <p className="font-body font-light text-[0.9rem] text-background/70 max-w-[440px] mt-6 leading-[1.85]">
+              La historia completa, contada por él mismo: el dolor real de los
+              entrenamientos y el segundo exacto en que la tortura se transforma
+              en victoria.
+            </p>
+          </div>
+          <Link
+            to="/sobre-mi"
+            className="inline-block self-start md:self-auto shrink-0 px-8 py-4 bg-background text-foreground font-body font-semibold text-[0.72rem] tracking-[0.2em] uppercase transition-opacity duration-300 hover:opacity-80"
+          >
+            Conocer el libro
+          </Link>
+        </Reveal>
       </section>
 
     </div>

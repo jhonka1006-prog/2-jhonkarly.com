@@ -7,7 +7,7 @@ import {
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 
-export type UserRole = "admin" | "prensa" | "premium" | "public";
+export type UserRole = "master" | "admin" | "prensa" | "premium" | "public";
 
 interface Profile {
   id: string;
@@ -27,11 +27,24 @@ interface AuthContextValue {
 
 export const AuthContext = createContext<AuthContextValue | null>(null);
 
+/* ── MODO VISTA PREVIA (solo desarrollo) ──
+   Con VITE_DEMO_ADMIN=true en .env entras directo como "master" sin login,
+   para revisar el dashboard mientras no estén las claves de Supabase.
+   Imposible en producción: import.meta.env.DEV es false en el build. */
+const DEMO_ADMIN =
+  import.meta.env.DEV &&
+  import.meta.env.MODE !== "test" &&
+  import.meta.env.VITE_DEMO_ADMIN === "true";
+
+const DEMO_SESSION = { access_token: "demo", user: { id: "demo-master" } } as unknown as Session;
+const DEMO_USER = { id: "demo-master", email: "login@jhonkarly.com" } as unknown as User;
+const DEMO_PROFILE: Profile = { id: "demo-master", role: "master", full_name: "Jhonkarly (vista previa)" };
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [session, setSession] = useState<Session | null>(null);
-  const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [session, setSession] = useState<Session | null>(DEMO_ADMIN ? DEMO_SESSION : null);
+  const [user, setUser] = useState<User | null>(DEMO_ADMIN ? DEMO_USER : null);
+  const [profile, setProfile] = useState<Profile | null>(DEMO_ADMIN ? DEMO_PROFILE : null);
+  const [loading, setLoading] = useState(!DEMO_ADMIN);
 
   const fetchProfile = async (userId: string) => {
     try {
@@ -53,6 +66,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
+    if (DEMO_ADMIN) return; // vista previa: sesión fija, no consultar Supabase
+
     // Carga sesión inicial — aguarda el perfil antes de quitar el loading
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);

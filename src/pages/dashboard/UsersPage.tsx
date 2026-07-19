@@ -27,10 +27,11 @@ const ROLES: UserRole[] = ["admin", "prensa", "premium", "public"];
 const PAGE_SIZE = 10;
 
 const ROLE_BADGE: Record<UserRole, string> = {
+  master:  "border-foreground text-foreground bg-foreground/10",
   admin:   "border-foreground text-foreground",
   prensa:  "border-g300 text-g300",
   premium: "border-g100 text-g100",
-  public:  "border-g700 text-g700",
+  public:  "border-g700 text-g500",
 };
 
 const initials = (name: string | null) =>
@@ -254,7 +255,7 @@ const UsersPage = () => {
 
   /* ── Input style helper ── */
   const inputCls = (field: string) =>
-    `w-full bg-g900 border font-body text-sm px-4 py-2.5 outline-none transition-colors placeholder:text-g700 text-foreground ${
+    `w-full bg-g900 border font-body text-sm px-4 py-2.5 outline-none transition-colors placeholder:text-g500 text-foreground ${
       createErrors[field] ? "border-destructive" : "border-g700 focus:border-g300"
     }`;
 
@@ -264,7 +265,7 @@ const UsersPage = () => {
       {/* ── Header ── */}
       <div className="flex items-start justify-between gap-4 mb-8 flex-wrap">
         <div>
-          <span className="font-body text-[0.6rem] font-semibold tracking-[0.38em] uppercase text-g700 block mb-2">
+          <span className="font-body text-[0.6rem] font-semibold tracking-[0.38em] uppercase text-g500 block mb-2">
             Dashboard · Administración
           </span>
           <h1 className="font-display text-[clamp(2rem,5vw,3.5rem)] leading-none text-foreground">
@@ -293,7 +294,7 @@ const UsersPage = () => {
             placeholder="Buscar por nombre, email o ID…"
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-            className="w-full bg-g900 border border-g700 text-foreground font-body text-sm pl-9 pr-4 py-2.5 outline-none focus:border-g300 transition-colors placeholder:text-g700"
+            className="w-full bg-g900 border border-g700 text-foreground font-body text-sm pl-9 pr-4 py-2.5 outline-none focus:border-g300 transition-colors placeholder:text-g500"
           />
         </div>
         <select
@@ -347,7 +348,7 @@ const UsersPage = () => {
 
           <button
             onClick={() => setSelected(new Set())}
-            className="ml-auto text-g700 hover:text-g300 transition-colors"
+            className="ml-auto text-g500 hover:text-g300 transition-colors"
             aria-label="Cancelar selección"
           >
             <X className="w-4 h-4" />
@@ -368,21 +369,21 @@ const UsersPage = () => {
                   className="accent-foreground cursor-pointer"
                 />
               </th>
-              <th className="text-left p-3 font-body text-[0.58rem] font-semibold tracking-[0.32em] uppercase text-g700">Usuario</th>
-              <th className="text-left p-3 font-body text-[0.58rem] font-semibold tracking-[0.32em] uppercase text-g700 hidden sm:table-cell">Rol</th>
-              <th className="text-left p-3 font-body text-[0.58rem] font-semibold tracking-[0.32em] uppercase text-g700 hidden lg:table-cell">Registro</th>
+              <th className="text-left p-3 font-body text-[0.58rem] font-semibold tracking-[0.32em] uppercase text-g500">Usuario</th>
+              <th className="text-left p-3 font-body text-[0.58rem] font-semibold tracking-[0.32em] uppercase text-g500 hidden sm:table-cell">Rol</th>
+              <th className="text-left p-3 font-body text-[0.58rem] font-semibold tracking-[0.32em] uppercase text-g500 hidden lg:table-cell">Registro</th>
               <th className="w-14 p-3" />
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={5} className="p-10 text-center font-body text-g700 text-sm">Cargando…</td>
+                <td colSpan={5} className="p-10 text-center font-body text-g500 text-sm">Cargando…</td>
               </tr>
             ) : paginated.length === 0 ? (
               <tr>
                 <td colSpan={5} className="p-10 text-center">
-                  <p className="font-body text-g700 text-sm mb-4">No hay usuarios que coincidan</p>
+                  <p className="font-body text-g500 text-sm mb-4">No hay usuarios que coincidan</p>
                   {!search && roleFilter === "all" && (
                     <button
                       onClick={() => setCreateOpen(true)}
@@ -418,7 +419,7 @@ const UsersPage = () => {
                           {user.full_name ?? "Sin nombre"}
                         </p>
                         {user.email && (
-                          <p className="font-body text-[0.7rem] text-g700 mt-0.5">{user.email}</p>
+                          <p className="font-body text-[0.7rem] text-g500 mt-0.5">{user.email}</p>
                         )}
                       </div>
                     </div>
@@ -428,13 +429,13 @@ const UsersPage = () => {
                       {user.role}
                     </span>
                   </td>
-                  <td className="p-3 hidden lg:table-cell font-body text-[0.78rem] text-g700">
+                  <td className="p-3 hidden lg:table-cell font-body text-[0.78rem] text-g500">
                     {fmtDate(user.created_at)}
                   </td>
                   <td className="p-3 text-center" onClick={(e) => e.stopPropagation()}>
                     <button
                       onClick={() => deleteUser(user.id)}
-                      className="text-g700 hover:text-destructive transition-colors p-1"
+                      className="text-g500 hover:text-destructive transition-colors p-1"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -449,7 +450,7 @@ const UsersPage = () => {
       {/* ── Pagination ── */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between mt-4 flex-wrap gap-3">
-          <span className="font-body text-[0.7rem] text-g700">
+          <span className="font-body text-[0.7rem] text-g500">
             {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered.length)} de {filtered.length}
           </span>
           <div className="flex items-center gap-2">
@@ -488,7 +489,7 @@ const UsersPage = () => {
             {/* Modal header */}
             <div className="flex items-start justify-between px-8 pt-8 pb-6 border-b border-g700">
               <div>
-                <span className="font-body text-[0.58rem] font-semibold tracking-[0.38em] uppercase text-g700 block mb-2">
+                <span className="font-body text-[0.58rem] font-semibold tracking-[0.38em] uppercase text-g500 block mb-2">
                   Gestión de usuarios
                 </span>
                 <h2 className="font-display text-[2rem] leading-none text-foreground">
@@ -498,7 +499,7 @@ const UsersPage = () => {
               <button
                 onClick={() => setCreateOpen(false)}
                 disabled={creating}
-                className="text-g700 hover:text-g300 transition-colors mt-1 disabled:opacity-30"
+                className="text-g500 hover:text-g300 transition-colors mt-1 disabled:opacity-30"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -509,7 +510,7 @@ const UsersPage = () => {
 
               {/* Full name */}
               <div>
-                <label className="font-body text-[0.6rem] font-semibold tracking-[0.3em] uppercase text-g700 block mb-2">
+                <label className="font-body text-[0.6rem] font-semibold tracking-[0.3em] uppercase text-g500 block mb-2">
                   Nombre completo <span className="text-destructive">*</span>
                 </label>
                 <input
@@ -527,7 +528,7 @@ const UsersPage = () => {
 
               {/* Email */}
               <div>
-                <label className="font-body text-[0.6rem] font-semibold tracking-[0.3em] uppercase text-g700 block mb-2">
+                <label className="font-body text-[0.6rem] font-semibold tracking-[0.3em] uppercase text-g500 block mb-2">
                   Correo electrónico <span className="text-destructive">*</span>
                 </label>
                 <input
@@ -545,7 +546,7 @@ const UsersPage = () => {
 
               {/* Password */}
               <div>
-                <label className="font-body text-[0.6rem] font-semibold tracking-[0.3em] uppercase text-g700 block mb-2">
+                <label className="font-body text-[0.6rem] font-semibold tracking-[0.3em] uppercase text-g500 block mb-2">
                   Contraseña temporal <span className="text-destructive">*</span>
                 </label>
                 <input
@@ -559,14 +560,14 @@ const UsersPage = () => {
                 {createErrors.password && (
                   <p className="font-body text-[0.7rem] text-destructive mt-1">{createErrors.password}</p>
                 )}
-                <p className="font-body text-[0.68rem] text-g700 mt-1.5">
+                <p className="font-body text-[0.68rem] text-g500 mt-1.5">
                   El usuario recibirá un email de confirmación y podrá cambiarla.
                 </p>
               </div>
 
               {/* Role */}
               <div>
-                <label className="font-body text-[0.6rem] font-semibold tracking-[0.3em] uppercase text-g700 block mb-3">
+                <label className="font-body text-[0.6rem] font-semibold tracking-[0.3em] uppercase text-g500 block mb-3">
                   Rol y permisos
                 </label>
                 <div className="grid grid-cols-2 gap-2">
@@ -579,7 +580,7 @@ const UsersPage = () => {
                       className={`font-body text-[0.65rem] font-semibold tracking-[0.2em] uppercase border px-3 py-2.5 transition-colors disabled:opacity-40 ${
                         newUser.role === r
                           ? "bg-foreground text-background border-foreground"
-                          : "border-g700 text-g700 hover:border-g300 hover:text-g300"
+                          : "border-g700 text-g500 hover:border-g300 hover:text-g300"
                       }`}
                     >
                       {r}
@@ -601,7 +602,7 @@ const UsersPage = () => {
               <button
                 onClick={() => setCreateOpen(false)}
                 disabled={creating}
-                className="w-full py-3 font-body text-[0.68rem] font-semibold tracking-[0.2em] uppercase text-g700 hover:text-g300 transition-colors disabled:opacity-40"
+                className="w-full py-3 font-body text-[0.68rem] font-semibold tracking-[0.2em] uppercase text-g500 hover:text-g300 transition-colors disabled:opacity-40"
               >
                 Cancelar
               </button>
@@ -644,10 +645,10 @@ const UsersPage = () => {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between px-6 py-4 border-b border-g700 sticky top-0 bg-background z-10">
-              <span className="font-body text-[0.58rem] font-semibold tracking-[0.32em] uppercase text-g700">
+              <span className="font-body text-[0.58rem] font-semibold tracking-[0.32em] uppercase text-g500">
                 Perfil de usuario
               </span>
-              <button onClick={() => setDetail(null)} className="text-g700 hover:text-g300 transition-colors">
+              <button onClick={() => setDetail(null)} className="text-g500 hover:text-g300 transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -666,15 +667,15 @@ const UsersPage = () => {
 
             <div className="px-6 py-6 flex flex-col gap-5 flex-1">
               <div>
-                <span className="font-body text-[0.58rem] font-semibold tracking-[0.32em] uppercase text-g700 block mb-1.5">ID</span>
+                <span className="font-body text-[0.58rem] font-semibold tracking-[0.32em] uppercase text-g500 block mb-1.5">ID</span>
                 <p className="font-body text-[0.72rem] text-g300 break-all font-mono">{detail.id}</p>
               </div>
               <div>
-                <span className="font-body text-[0.58rem] font-semibold tracking-[0.32em] uppercase text-g700 block mb-1.5">Registro</span>
+                <span className="font-body text-[0.58rem] font-semibold tracking-[0.32em] uppercase text-g500 block mb-1.5">Registro</span>
                 <p className="font-body text-sm text-g300">{fmtDate(detail.created_at)}</p>
               </div>
               <div>
-                <span className="font-body text-[0.58rem] font-semibold tracking-[0.32em] uppercase text-g700 block mb-3">
+                <span className="font-body text-[0.58rem] font-semibold tracking-[0.32em] uppercase text-g500 block mb-3">
                   Permisos / Rol
                 </span>
                 <div className="grid grid-cols-2 gap-2">
@@ -685,7 +686,7 @@ const UsersPage = () => {
                       className={`font-body text-[0.65rem] font-semibold tracking-[0.2em] uppercase border px-3 py-2.5 transition-colors duration-300 ${
                         detail.role === r
                           ? "bg-foreground text-background border-foreground"
-                          : "border-g700 text-g700 hover:border-g300 hover:text-g300"
+                          : "border-g700 text-g500 hover:border-g300 hover:text-g300"
                       }`}
                     >
                       {r}

@@ -13,6 +13,9 @@ export default defineConfig(() => ({
     },
   },
   plugins: [react()],
+  /* Acepta fotos con extensión en MAYÚSCULAS (como las guarda el iPhone:
+     IMG_1234.JPEG) para que basten pegarlas en las carpetas de imágenes. */
+  assetsInclude: ["**/*.JPEG", "**/*.JPG", "**/*.PNG", "**/*.WEBP", "**/*.GIF", "**/*.AVIF"],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
@@ -25,7 +28,6 @@ export default defineConfig(() => ({
           vendor: ["react", "react-dom", "react-router-dom"],
           supabase: ["@supabase/supabase-js"],
           charts: ["recharts"],
-          ui: ["@radix-ui/react-tooltip", "@radix-ui/react-dialog", "@radix-ui/react-toast"],
         },
       },
     },

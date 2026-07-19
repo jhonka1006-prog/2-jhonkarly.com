@@ -55,6 +55,7 @@ export default {
         g900: "hsl(var(--g900))",
         g800: "hsl(var(--g800))",
         g700: "hsl(var(--g700))",
+        g500: "hsl(var(--g500))",
         g300: "hsl(var(--g300))",
         g100: "hsl(var(--g100))",
         sidebar: {

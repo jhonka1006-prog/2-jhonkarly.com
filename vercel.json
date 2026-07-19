@@ -6,7 +6,7 @@
   "trailingSlash": false,
   "rewrites": [
     {
-      "source": "/((?!assets/|favicon\\.ico|apple-touch-icon\\.png|robots\\.txt|sitemap\\.xml|placeholder\\.svg|privacidad|terminos|.*\\..*).*)",
+      "source": "/((?!assets/|favicon\\.ico|apple-touch-icon\\.png|robots\\.txt|sitemap\\.xml|placeholder\\.svg|.*\\..*).*)",
       "destination": "/index.html"
     }
   ],
@@ -34,6 +34,18 @@
         {
           "key": "X-XSS-Protection",
           "value": "1; mode=block"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=(), payment=()"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=63072000; includeSubDomains"
         }
       ]
     }

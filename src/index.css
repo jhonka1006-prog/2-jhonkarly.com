@@ -1,4 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,300;0,400;0,600;1,300&display=swap');
+/* Las fuentes (Bebas Neue + Barlow) se cargan desde index.html con
+   preconnect + <link> para no bloquear el primer render. */
 
 @tailwind base;
 @tailwind components;
@@ -40,8 +41,11 @@
     --g900: 0 0% 7%;
     --g800: 0 0% 10%;
     --g700: 0 0% 17%;
+    --g500: 0 0% 52%; /* gris medio: texto secundario legible sobre negro (AA) */
     --g300: 0 0% 75%;
     --g100: 0 0% 90%;
+
+    color-scheme: dark;
 
     --font-display: 'Bebas Neue', sans-serif;
     --font-body: 'Barlow', sans-serif;
@@ -69,6 +73,11 @@
     scroll-behavior: smooth;
   }
 
+  /* Al navegar a #anclas, deja aire para el navbar fijo (68px) */
+  [id] {
+    scroll-margin-top: 84px;
+  }
+
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-body);
@@ -84,6 +93,36 @@
     text-transform: uppercase;
     letter-spacing: 0.02em;
     line-height: 0.93;
+  }
+
+  ::selection {
+    background: hsl(var(--foreground));
+    color: hsl(var(--background));
+  }
+
+  /* Foco visible para navegación con teclado (sin afectar clics de ratón) */
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 2px solid hsl(var(--foreground));
+    outline-offset: 3px;
+  }
+
+  /* Respeta la preferencia de movimiento reducido del sistema */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }
 
@@ -331,9 +370,39 @@
     color: hsl(var(--foreground));
   }
 
+  /* ── Marquesina de patrocinadores ── */
+  .sponsors-marquee {
+    width: 100%;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+    mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+  }
+
+  .sponsors-track {
+    display: flex;
+    align-items: center;
+    gap: clamp(48px, 8vw, 96px);
+    width: max-content;
+    padding-right: clamp(48px, 8vw, 96px);
+    animation: sponsors-scroll 28s linear infinite;
+  }
+
+  .sponsors-marquee:hover .sponsors-track {
+    animation-play-state: paused;
+  }
+
+  @keyframes sponsors-scroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sponsors-track { animation: none; flex-wrap: wrap; width: 100%; justify-content: center; }
+  }
+
   .footer-socials {
     display: grid;
-    grid-template-columns: repeat(2, 44px);
+    grid-template-columns: repeat(3, 44px);
     gap: 8px;
   }
 

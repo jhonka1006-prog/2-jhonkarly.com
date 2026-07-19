@@ -16,7 +16,7 @@ if (!urlReady) {
 // para evitar que el SDK crashee en desarrollo
 export const supabase = createClient(
   urlReady ? supabaseUrl : "https://placeholder.supabase.co",
-  supabaseAnonKey ?? "placeholder"
+  supabaseAnonKey || "placeholder" // "||" cubre también cadena vacía (ej. .env sin rellenar)
 );
 
 export const supabaseReady = urlReady;

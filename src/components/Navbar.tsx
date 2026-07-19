@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useAuth } from "@/hooks/use-auth";
-import "../index.css";
 
 const PUBLIC_LINKS = [
   { to: "/",            label: "Inicio",      exact: true  },
@@ -13,14 +11,15 @@ const PUBLIC_LINKS = [
 
 const Navbar = () => {
   const location  = useLocation();
-  const { session } = useAuth();
   const [open, setOpen] = useState(false);
 
-  const accountLink = session
-    ? { to: "/mi-cuenta", label: "Mi cuenta", exact: false }
-    : { to: "/login", label: "Inicio de sesión", exact: false };
-
-  const allLinks = [...PUBLIC_LINKS, accountLink];
+  /* El menú público siempre ofrece "Inicio de sesión": desde /login se
+     entra con credenciales y, según el rol, se llega al panel o a Mi cuenta.
+     "Mi cuenta" vive dentro del panel (/dashboard), no en este menú. */
+  const allLinks = [
+    ...PUBLIC_LINKS,
+    { to: "/login", label: "Inicio de sesión", exact: false },
+  ];
 
   useEffect(() => { setOpen(false); }, [location.pathname]);
 
@@ -37,7 +36,7 @@ const Navbar = () => {
   return (
     <>
       <header className="site-header" role="banner">
-        <Link to="/" className="site-header__logo" aria-label="Jhonkarly ALVAREZ — Inicio">
+        <Link to="/" className="site-header__logo" aria-label="Jhonkarly Alvarez — Inicio">
           JHONKARLY ALVAREZ
         </Link>
 

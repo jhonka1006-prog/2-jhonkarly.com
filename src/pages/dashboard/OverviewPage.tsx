@@ -38,6 +38,7 @@ const ACTIVITY_HOURS = [
 ];
 
 const ROLE_HEX: Record<UserRole, string> = {
+  master:  "#fafafa",
   admin:   "#ffffff",
   prensa:  "#bfbfbf",
   premium: "#e6e6e6",
@@ -65,7 +66,7 @@ const ChartTooltip = ({ active, payload, label }: ChartTooltipProps) => {
   if (!active || !payload?.length) return null;
   return (
     <div className="bg-g900 border border-g700 px-3 py-2">
-      <p className="font-body text-[0.6rem] tracking-[0.28em] uppercase text-g700 mb-1">{label}</p>
+      <p className="font-body text-[0.6rem] tracking-[0.28em] uppercase text-g500 mb-1">{label}</p>
       {payload.map((p) => (
         <p key={p.name} className="font-body text-[0.78rem] font-semibold" style={{ color: p.color }}>
           {p.name}: {p.value}
@@ -124,7 +125,7 @@ const OverviewPage = () => {
     <div>
       {/* Header */}
       <div className="mb-8">
-        <span className="font-body text-[0.6rem] font-semibold tracking-[0.38em] uppercase text-g700 block mb-2">
+        <span className="font-body text-[0.6rem] font-semibold tracking-[0.38em] uppercase text-g500 block mb-2">
           Dashboard · Analítica
         </span>
         <h1 className="font-display text-[clamp(2rem,5vw,3.5rem)] leading-none text-foreground">
@@ -140,13 +141,13 @@ const OverviewPage = () => {
         {kpis.map((k) => (
           <div key={k.label} className="border-b border-r border-g700 p-6">
             <div className="flex items-start justify-between mb-4">
-              <span className="font-body text-[0.58rem] font-semibold tracking-[0.32em] uppercase text-g700">
+              <span className="font-body text-[0.58rem] font-semibold tracking-[0.32em] uppercase text-g500">
                 {k.label}
               </span>
               <k.icon className="w-4 h-4 text-g700 flex-shrink-0" />
             </div>
             <p className="font-display text-[2.4rem] leading-none text-foreground mb-1">{k.value}</p>
-            <p className="font-body text-[0.7rem] text-g700">{k.sub}</p>
+            <p className="font-body text-[0.7rem] text-g500">{k.sub}</p>
           </div>
         ))}
       </div>
@@ -156,7 +157,7 @@ const OverviewPage = () => {
 
         {/* 1 — Area: growth */}
         <div className="border-b border-r border-g700 p-6">
-          <span className="font-body text-[0.58rem] font-semibold tracking-[0.32em] uppercase text-g700 block mb-1">
+          <span className="font-body text-[0.58rem] font-semibold tracking-[0.32em] uppercase text-g500 block mb-1">
             Crecimiento de usuarios
           </span>
           <p className="font-body text-[0.72rem] text-g300 mb-5">Acumulado mensual</p>
@@ -185,16 +186,16 @@ const OverviewPage = () => {
 
         {/* 2 — Pie: role distribution */}
         <div className="border-b border-r border-g700 p-6">
-          <span className="font-body text-[0.58rem] font-semibold tracking-[0.32em] uppercase text-g700 block mb-1">
+          <span className="font-body text-[0.58rem] font-semibold tracking-[0.32em] uppercase text-g500 block mb-1">
             Distribución de roles
           </span>
           <p className="font-body text-[0.72rem] text-g300 mb-5">Segmentación de la base de usuarios</p>
           {loading ? (
-            <div className="h-[190px] flex items-center justify-center font-body text-g700 text-sm">
+            <div className="h-[190px] flex items-center justify-center font-body text-g500 text-sm">
               Cargando…
             </div>
           ) : roleData.length === 0 ? (
-            <div className="h-[190px] flex items-center justify-center font-body text-g700 text-sm">
+            <div className="h-[190px] flex items-center justify-center font-body text-g500 text-sm">
               Sin datos
             </div>
           ) : (
@@ -225,7 +226,7 @@ const OverviewPage = () => {
 
         {/* 3 — Line: engagement */}
         <div className="border-b border-r border-g700 p-6">
-          <span className="font-body text-[0.58rem] font-semibold tracking-[0.32em] uppercase text-g700 block mb-1">
+          <span className="font-body text-[0.58rem] font-semibold tracking-[0.32em] uppercase text-g500 block mb-1">
             Engagement
           </span>
           <p className="font-body text-[0.72rem] text-g300 mb-5">Nuevos vs. recurrentes por mes</p>
@@ -243,7 +244,7 @@ const OverviewPage = () => {
 
         {/* 4 — Bar: activity by hour */}
         <div className="border-b border-r border-g700 p-6">
-          <span className="font-body text-[0.58rem] font-semibold tracking-[0.32em] uppercase text-g700 block mb-1">
+          <span className="font-body text-[0.58rem] font-semibold tracking-[0.32em] uppercase text-g500 block mb-1">
             Actividad por hora
           </span>
           <p className="font-body text-[0.72rem] text-g300 mb-5">Tráfico web promedio (UTC-5)</p>

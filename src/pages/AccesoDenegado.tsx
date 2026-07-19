@@ -1,7 +1,13 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
+import { usePageMeta } from "@/lib/seo";
 
 const AccesoDenegado = () => {
+  usePageMeta({
+    titulo: "Acceso denegado — Jhonkarly Alvarez",
+    noindex: true,
+  });
+
   const { signOut } = useAuth();
 
   return (
@@ -27,7 +33,7 @@ const AccesoDenegado = () => {
           </Link>
           <button
             onClick={signOut}
-            className="font-body text-[0.68rem] font-semibold tracking-[0.2em] uppercase text-g700 hover:text-g300 transition-colors duration-300"
+            className="font-body text-[0.68rem] font-semibold tracking-[0.2em] uppercase text-g500 hover:text-g300 transition-colors duration-300"
           >
             Cerrar sesión
           </button>
