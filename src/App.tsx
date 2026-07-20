@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 
 import { AuthProvider } from "@/context/AuthContext";
+import { CartProvider } from "@/context/CartContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import PageTransition from "@/components/PageTransition";
@@ -155,9 +156,11 @@ const App = () => (
     <Toaster />
     <BrowserRouter>
       <AuthProvider>
-        <ErrorBoundary>
-          <AppShell />
-        </ErrorBoundary>
+        <CartProvider>
+          <ErrorBoundary>
+            <AppShell />
+          </ErrorBoundary>
+        </CartProvider>
       </AuthProvider>
     </BrowserRouter>
   </QueryClientProvider>

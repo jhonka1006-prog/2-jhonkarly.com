@@ -5,6 +5,9 @@ import { useCreateOrder } from "@/hooks/use-pedidos";
 import { fmtPrecio, Product } from "@/lib/api/tienda";
 import { Order, PaymentMethod, METODOS_PAGO } from "@/lib/api/pedidos";
 import { useAuth } from "@/hooks/use-auth";
+import { useCart, CartItem } from "@/context/CartContext";
+import { getPasarelaActiva } from "@/lib/pagos";
+import { hayEnvioInternacional } from "@/lib/envios";
 import { usePageMeta } from "@/lib/seo";
 
 const inputCls =
@@ -12,9 +15,10 @@ const inputCls =
 const labelCls =
   "font-body text-[0.6rem] font-semibold tracking-[0.3em] uppercase text-g500 block mb-2";
 
-/* ── Modal de compra ── */
-const CheckoutModal = ({ producto, onClose }: { producto: Product; onClose: () => void }) => {
+/* ── Modal de compra (todo el carrito) ── */
+const CheckoutModal = ({ items, onClose }: { items: CartItem[]; onClose: () => void }) => {
   const { user, profile } = useAuth();
+  const { vaciar } = useCart();
 
   /* Cerrar con Escape (accesibilidad de teclado) */
   useEffect(() => {
@@ -24,7 +28,7 @@ const CheckoutModal = ({ producto, onClose }: { producto: Product; onClose: () =
   }, [onClose]);
 
   const crearPedido = useCreateOrder();
-  const [qty, setQty] = useState(1);
+  const pasarela = getPasarelaActiva();
   const [pago, setPago] = useState<PaymentMethod>("transferencia");
   const [datos, setDatos] = useState({
     nombre: profile?.full_name ?? "",
@@ -38,7 +42,7 @@ const CheckoutModal = ({ producto, onClose }: { producto: Product; onClose: () =
   const [error, setError] = useState<string | null>(null);
   const [pedidoCreado, setPedidoCreado] = useState<Order | null>(null);
 
-  const total = producto.price * qty;
+  const total = items.reduce((acc, i) => acc + i.price * i.qty, 0);
 
   const confirmar = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,11 +63,12 @@ const CheckoutModal = ({ producto, onClose }: { producto: Product; onClose: () =
         city: datos.ciudad.trim(),
         department: datos.departamento.trim(),
         notes: datos.notas.trim() || null,
-        items: [{ product_id: producto.id, name: producto.name, price: producto.price, qty }],
+        items: items.map(({ product_id, name, price, qty }) => ({ product_id, name, price, qty })),
         total,
         payment_method: pago,
       });
       setPedidoCreado(pedido);
+      vaciar();
     } catch (err) {
       setError((err as Error).message);
     }
@@ -75,7 +80,7 @@ const CheckoutModal = ({ producto, onClose }: { producto: Product; onClose: () =
       <div
         role="dialog"
         aria-modal="true"
-        aria-label={`Finalizar compra — ${producto.name}`}
+        aria-label="Finalizar compra"
         className="relative w-full max-w-[520px] mx-4 bg-background border border-g700 max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
@@ -132,7 +137,7 @@ const CheckoutModal = ({ producto, onClose }: { producto: Product; onClose: () =
                   Finalizar compra
                 </span>
                 <h2 className="font-display text-[1.7rem] leading-none text-foreground">
-                  {producto.name}
+                  Tu pedido
                 </h2>
               </div>
               <button type="button" onClick={onClose} className="text-g500 hover:text-foreground transition-colors mt-1" aria-label="Cerrar">
@@ -141,17 +146,21 @@ const CheckoutModal = ({ producto, onClose }: { producto: Product; onClose: () =
             </div>
 
             <div className="px-8 py-6 flex flex-col gap-5">
-              {/* Cantidad + total */}
-              <div className="flex items-center justify-between border border-g700 bg-g900 px-5 py-4">
-                <div className="flex items-center gap-4">
-                  <span className={labelCls + " !mb-0"}>Cantidad</span>
-                  <div className="flex items-center gap-3">
-                    <button type="button" onClick={() => setQty((q) => Math.max(1, q - 1))} className="w-8 h-8 border border-g700 text-g300 hover:border-g300 hover:text-foreground transition-colors" aria-label="Menos">−</button>
-                    <span className="font-display text-[1.2rem] text-foreground w-6 text-center">{qty}</span>
-                    <button type="button" onClick={() => setQty((q) => Math.min(20, q + 1))} className="w-8 h-8 border border-g700 text-g300 hover:border-g300 hover:text-foreground transition-colors" aria-label="Más">+</button>
-                  </div>
-                </div>
-                <div className="text-right">
+              {/* Resumen del carrito */}
+              <div className="border border-g700 bg-g900">
+                <ul className="divide-y divide-g700">
+                  {items.map((i) => (
+                    <li key={i.product_id} className="flex items-center justify-between gap-4 px-5 py-3">
+                      <span className="font-body text-[0.82rem] text-g300 min-w-0 truncate">
+                        {i.name} <span className="text-g500">× {i.qty}</span>
+                      </span>
+                      <span className="font-body text-[0.82rem] text-foreground shrink-0">
+                        {fmtPrecio(i.price * i.qty)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="flex items-center justify-between px-5 py-4 border-t border-g700">
                   <span className={labelCls + " !mb-0"}>Total</span>
                   <span className="font-display text-[1.3rem] text-foreground">{fmtPrecio(total)}</span>
                 </div>
@@ -189,6 +198,14 @@ const CheckoutModal = ({ producto, onClose }: { producto: Product; onClose: () =
                 </div>
               </div>
 
+              {/* Envío: por ahora solo nacional */}
+              {!hayEnvioInternacional() && (
+                <p className="font-body text-[0.72rem] text-g500 leading-[1.7] border border-g700 bg-g900 px-4 py-3">
+                  Por ahora los envíos cubren <strong className="text-g300">toda Colombia</strong>.
+                  Los envíos internacionales (DHL / FedEx) llegarán en una próxima actualización.
+                </p>
+              )}
+
               {/* Método de pago */}
               <div>
                 <span className={labelCls}>Método de pago</span>
@@ -207,6 +224,26 @@ const CheckoutModal = ({ producto, onClose }: { producto: Product; onClose: () =
                       {METODOS_PAGO[m]}
                     </button>
                   ))}
+                  {pasarela ? (
+                    <button
+                      type="button"
+                      onClick={() => setPago("pasarela")}
+                      className={`sm:col-span-2 font-body text-[0.65rem] font-semibold tracking-[0.15em] uppercase border px-3 py-3 transition-colors text-left ${
+                        pago === "pasarela"
+                          ? "bg-foreground text-background border-foreground"
+                          : "border-g700 text-g300 hover:border-g300"
+                      }`}
+                    >
+                      Tarjeta débito/crédito · PSE ({pasarela.nombre})
+                    </button>
+                  ) : (
+                    <span
+                      className="sm:col-span-2 font-body text-[0.65rem] font-semibold tracking-[0.15em] uppercase border border-g700 border-dashed px-3 py-3 text-g500 cursor-not-allowed text-left"
+                      title="Disponible en una próxima actualización"
+                    >
+                      Tarjeta Visa/Mastercard · PSE — Muy pronto
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -233,12 +270,151 @@ const CheckoutModal = ({ producto, onClose }: { producto: Product; onClose: () =
   );
 };
 
-/* ── Tarjeta de producto ── */
-const TarjetaProducto = ({ producto, onComprar }: { producto: Product; onComprar: (p: Product) => void }) => {
+/* ── Panel lateral del carrito ── */
+const CartDrawer = ({ onCheckout }: { onCheckout: () => void }) => {
+  const { items, subtotal, abierto, setAbierto, cambiarQty, quitar, vaciar } = useCart();
   const { session } = useAuth();
   const location = useLocation();
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setAbierto(false); };
+    if (abierto) document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [abierto, setAbierto]);
+
+  if (!abierto) return null;
+
+  return (
+    <div className="fixed inset-0 z-50" onClick={() => setAbierto(false)}>
+      <div className="absolute inset-0 bg-black/70" />
+      <aside
+        role="dialog"
+        aria-modal="true"
+        aria-label="Carrito de compras"
+        className="absolute right-0 top-0 h-full w-full max-w-[420px] bg-background border-l border-g700 flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between px-6 py-5 border-b border-g700">
+          <h2 className="font-display text-[1.5rem] leading-none text-foreground">
+            Carrito
+          </h2>
+          <button onClick={() => setAbierto(false)} className="text-g500 hover:text-foreground transition-colors" aria-label="Cerrar carrito">
+            ✕
+          </button>
+        </div>
+
+        {items.length === 0 ? (
+          <div className="flex-1 flex flex-col items-center justify-center gap-4 px-8 text-center">
+            <p className="font-body font-light text-[0.88rem] text-g300 leading-[1.85]">
+              Tu carrito está vacío.
+            </p>
+            <button
+              onClick={() => setAbierto(false)}
+              className="px-6 py-3 border border-g700 text-g300 font-body font-semibold text-[0.68rem] tracking-[0.2em] uppercase hover:border-g300 hover:text-foreground transition-colors"
+            >
+              Ver productos
+            </button>
+          </div>
+        ) : (
+          <>
+            <ul className="flex-1 overflow-y-auto divide-y divide-g700">
+              {items.map((i) => (
+                <li key={i.product_id} className="flex gap-4 px-6 py-5">
+                  <div className="w-16 h-16 bg-g800 border border-g700 shrink-0 overflow-hidden">
+                    {i.image ? (
+                      <img src={i.image} alt={i.name} className="w-full h-full object-cover" loading="lazy" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center font-body text-[0.5rem] uppercase tracking-widest text-g500">Sin foto</div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-3">
+                      <p className="font-body text-[0.85rem] text-foreground leading-snug">{i.name}</p>
+                      <button onClick={() => quitar(i.product_id)} className="text-g500 hover:text-foreground transition-colors shrink-0" aria-label={`Quitar ${i.name}`}>
+                        ✕
+                      </button>
+                    </div>
+                    <div className="flex items-center justify-between mt-3">
+                      <div className="flex items-center gap-2">
+                        <button onClick={() => cambiarQty(i.product_id, i.qty - 1)} className="w-7 h-7 border border-g700 text-g300 hover:border-g300 hover:text-foreground transition-colors" aria-label="Menos">−</button>
+                        <span className="font-body text-[0.85rem] text-foreground w-6 text-center">{i.qty}</span>
+                        <button onClick={() => cambiarQty(i.product_id, i.qty + 1)} className="w-7 h-7 border border-g700 text-g300 hover:border-g300 hover:text-foreground transition-colors" aria-label="Más">+</button>
+                      </div>
+                      <span className="font-body text-[0.85rem] text-foreground">{fmtPrecio(i.price * i.qty)}</span>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+
+            <div className="border-t border-g700 px-6 py-5">
+              <div className="flex items-center justify-between mb-4">
+                <span className={labelCls + " !mb-0"}>Subtotal</span>
+                <span className="font-display text-[1.4rem] text-foreground">{fmtPrecio(subtotal)}</span>
+              </div>
+              <p className="font-body text-[0.68rem] text-g500 leading-[1.7] mb-4">
+                Envíos a toda Colombia. El costo de envío se coordina al confirmar el pedido.
+              </p>
+              {session ? (
+                <button
+                  onClick={onCheckout}
+                  className="w-full py-4 bg-foreground text-background font-body font-semibold text-[0.72rem] tracking-[0.22em] uppercase transition-opacity hover:opacity-80"
+                >
+                  Finalizar compra
+                </button>
+              ) : (
+                <Link
+                  to="/login"
+                  state={{ from: location }}
+                  onClick={() => setAbierto(false)}
+                  className="block w-full text-center py-4 bg-foreground text-background font-body font-semibold text-[0.72rem] tracking-[0.22em] uppercase transition-opacity hover:opacity-80"
+                >
+                  Inicia sesión para comprar
+                </Link>
+              )}
+              <button
+                onClick={vaciar}
+                className="w-full mt-2 py-2 font-body text-[0.62rem] font-semibold tracking-[0.2em] uppercase text-g500 hover:text-foreground transition-colors"
+              >
+                Vaciar carrito
+              </button>
+            </div>
+          </>
+        )}
+      </aside>
+    </div>
+  );
+};
+
+/* ── Botón flotante del carrito ── */
+const CartButton = () => {
+  const { count, setAbierto } = useCart();
+  return (
+    <button
+      onClick={() => setAbierto(true)}
+      aria-label={`Abrir carrito (${count} ${count === 1 ? "artículo" : "artículos"})`}
+      className="fixed bottom-6 right-6 z-40 flex items-center gap-3 bg-foreground text-background px-5 py-4 font-body font-semibold text-[0.68rem] tracking-[0.22em] uppercase shadow-lg transition-opacity hover:opacity-85"
+    >
+      Carrito
+      <span className="inline-flex items-center justify-center min-w-6 h-6 px-1.5 bg-background text-foreground font-body text-[0.72rem] font-bold">
+        {count}
+      </span>
+    </button>
+  );
+};
+
+/* ── Tarjeta de producto ── */
+const TarjetaProducto = ({ producto }: { producto: Product }) => {
+  const { agregar, setAbierto } = useCart();
+  const [agregado, setAgregado] = useState(false);
   const foto = producto.image_urls[0];
   const fotoHover = producto.image_urls[1];
+
+  const alAgregar = () => {
+    agregar(producto);
+    setAgregado(true);
+    window.setTimeout(() => setAgregado(false), 1600);
+  };
 
   return (
     <article className={`group border border-g700 bg-g900 flex flex-col ${!producto.available ? "opacity-60" : ""}`}>
@@ -304,21 +480,20 @@ const TarjetaProducto = ({ producto, onComprar }: { producto: Product; onComprar
             >
               Comprar
             </a>
-          ) : session ? (
+          ) : agregado ? (
             <button
-              onClick={() => onComprar(producto)}
-              className="block w-full text-center py-3.5 bg-foreground text-background font-body font-semibold text-[0.68rem] tracking-[0.22em] uppercase transition-opacity duration-300 hover:opacity-80"
+              onClick={() => setAbierto(true)}
+              className="block w-full text-center py-3.5 border border-foreground text-foreground font-body font-semibold text-[0.68rem] tracking-[0.22em] uppercase"
             >
-              Comprar
+              ✓ Agregado — Ver carrito
             </button>
           ) : (
-            <Link
-              to="/login"
-              state={{ from: location }}
+            <button
+              onClick={alAgregar}
               className="block w-full text-center py-3.5 bg-foreground text-background font-body font-semibold text-[0.68rem] tracking-[0.22em] uppercase transition-opacity duration-300 hover:opacity-80"
             >
-              Inicia sesión para comprar
-            </Link>
+              Agregar al carrito
+            </button>
           )}
         </div>
       </div>
@@ -335,8 +510,16 @@ const Tienda = () => {
   });
 
   const { data: productos, isLoading } = useProducts();
-  const [comprando, setComprando] = useState<Product | null>(null);
+  const { items, setAbierto } = useCart();
+  /* Copia del carrito al iniciar el checkout: así la pantalla de
+     confirmación sobrevive al vaciado del carrito tras crear el pedido. */
+  const [checkoutItems, setCheckoutItems] = useState<CartItem[] | null>(null);
   const hayProductos = !!productos && productos.length > 0;
+
+  const abrirCheckout = () => {
+    setAbierto(false);
+    setCheckoutItems(items.map((i) => ({ ...i })));
+  };
 
   return (
     <div id="main-content" className="min-h-screen bg-background flex flex-col">
@@ -387,10 +570,39 @@ const Tienda = () => {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {productos.map((p) => (
-                <TarjetaProducto key={p.id} producto={p} onComprar={setComprando} />
+                <TarjetaProducto key={p.id} producto={p} />
               ))}
             </div>
           )}
+        </div>
+      </section>
+
+      {/* ── CÓMO FUNCIONA ── */}
+      <section className="border-t border-border py-[clamp(40px,6vw,72px)] px-[var(--px)]" aria-label="Información de compra">
+        <div className="max-w-[var(--container-max)] mx-auto grid grid-cols-1 sm:grid-cols-3 gap-8">
+          {[
+            {
+              t: "Pago flexible",
+              d: "Transferencia (Nequi / Bancolombia) o contra entrega. Muy pronto: tarjetas Visa/Mastercard y PSE.",
+            },
+            {
+              t: "Envíos en Colombia",
+              d: "Despachamos a todo el país. Los envíos internacionales con DHL / FedEx llegarán en una próxima actualización.",
+            },
+            {
+              t: "Compra con propósito",
+              d: "El 100 % de esta tienda financia entrenamientos, viajes y competencias rumbo a Los Ángeles 2028.",
+            },
+          ].map((b) => (
+            <div key={b.t} className="border border-g700 bg-g900 p-6">
+              <h3 className="font-body text-[0.68rem] font-semibold tracking-[0.28em] uppercase text-foreground mb-3">
+                {b.t}
+              </h3>
+              <p className="font-body font-light text-[0.82rem] text-g300 leading-[1.8]">
+                {b.d}
+              </p>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -414,8 +626,12 @@ const Tienda = () => {
         </div>
       </section>
 
-      {/* ── Checkout ── */}
-      {comprando && <CheckoutModal producto={comprando} onClose={() => setComprando(null)} />}
+      {/* ── Carrito ── */}
+      {hayProductos && <CartButton />}
+      <CartDrawer onCheckout={abrirCheckout} />
+      {checkoutItems && checkoutItems.length > 0 && (
+        <CheckoutModal items={checkoutItems} onClose={() => setCheckoutItems(null)} />
+      )}
 
     </div>
   );

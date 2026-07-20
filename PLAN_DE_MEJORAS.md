@@ -151,14 +151,12 @@ jhonkarly.com es el sitio web personal de Jhonkarly Alvarez, nadador paralímpic
 ## Pendientes (requieren acción del usuario)
 
 **Para que el sitio funcione en producción:**
-- [ ] Pegar las claves reales de Supabase en `.env` local (`VITE_SUPABASE_URL`,
-      `VITE_SUPABASE_ANON_KEY`) y apagar `VITE_DEMO_ADMIN` (ponerla en `false`).
-- [ ] Configurar esas mismas variables en Vercel y hacer redeploy — la producción
-      actual fue compilada sin ellas y el login NO funciona en jhonkarly.com.
-- [ ] Ejecutar en el SQL Editor de Supabase las migraciones pendientes de
-      `supabase/migrations/` (002 en adelante) y crear el bucket de Storage "media".
+- [x] ~~Claves de Supabase en `.env` y Vercel~~ — hecho 2026-07-19: proyecto
+      `jhonkarly-com` activo, 11 migraciones aplicadas, login y tienda operativos.
 - [ ] Desplegar la Edge Function `enviar-factura` y configurar el secret
       `RESEND_API_KEY` (envío de facturas por correo).
+- [ ] En Vercel → Settings → Domains: hacer `jhonkarly.com` el dominio primario
+      (hoy redirige a `www`, pero el canonical del sitio es sin `www`).
 
 **Contenido que solo el usuario puede aportar:**
 - [ ] Links de los videos: `VIDEO_KING_OF_POOL` y `VIDEO_LOS_ANGELES_2028` en
@@ -173,10 +171,17 @@ jhonkarly.com es el sitio web personal de Jhonkarly Alvarez, nadador paralímpic
 
 **Mejoras técnicas aplazadas:**
 - [ ] Regenerar `favicon.ico` y `apple-touch-icon.png` con el hacha nórdica.
-- [ ] Pasarela de pago real (Wompi/MercadoPago) — requiere cuenta de comercio.
 - [ ] Facturación electrónica ante la DIAN — requiere habilitación como
       facturador electrónico.
-- [ ] 2FA en Supabase (requiere conexión activa con claves reales).
+- [ ] 2FA en Supabase.
+
+**Próximas actualizaciones (andamiaje listo — guía en `INTEGRACIONES.md`):**
+- [ ] **Pagos con tarjeta Visa/Mastercard y PSE** — pre-integración en
+      `src/lib/pagos/` (Wompi recomendada, Mercado Pago alternativa). Requiere
+      cuenta de comercio; al activarla el botón aparece solo en el checkout.
+- [ ] **Envíos internacionales con DHL / FedEx** — pre-integración en
+      `src/lib/envios/` (cotización + generación de guía). Requiere cuenta de
+      negocio con la paquetera; al activarla el checkout ofrece envío exterior.
 
 ---
 
