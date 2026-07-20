@@ -11,6 +11,7 @@ import PageTransition from "@/components/PageTransition";
 import ScrollToTop from "@/components/ScrollToTop";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import CookieBanner from "@/components/CookieBanner";
 
 /* ── Lazy-loaded pages (code splitting) ── */
 const Index = lazy(() => import("@/pages/Index"));
@@ -147,6 +148,7 @@ const AppShell = () => {
       </Suspense>
 
       {!isDash && <Footer />}
+      {!isDash && <CookieBanner />}
     </>
   );
 };

@@ -85,9 +85,10 @@ const Privacidad = () => {
         contenido: (
           <p>
             Este sitio no usa cookies publicitarias ni de analítica de terceros. Únicamente se
-            utiliza el almacenamiento local del navegador para mantener tu sesión iniciada en el
-            área privada. Puedes borrarlo en cualquier momento desde la configuración de tu
-            navegador; solo perderás la sesión.
+            utiliza el almacenamiento local del navegador para tres cosas: mantener tu sesión
+            iniciada en el área privada, recordar los productos de tu carrito de compras entre
+            visitas, y guardar tu aceptación de este aviso. Puedes borrarlo en cualquier momento
+            desde la configuración de tu navegador; solo perderás la sesión y el carrito.
           </p>
         ),
       },
